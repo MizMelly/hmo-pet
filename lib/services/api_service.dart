@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const baseUrl = "https://simba-39la.onrender.com";
+  static const baseUrl = "https://simba-39la.onrender.com/api";
 
   static Future<Map<String, dynamic>> register(String email, String password, String fullname) async {
-    final url = Uri.parse('$baseUrl/register');
+    final url = Uri.parse('$baseUrl/users/register');
     final response = await http.post(url, body: {
       'email': email,
       'password': password,
@@ -20,7 +20,7 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> login(String email, String password) async {
-    final url = Uri.parse('$baseUrl/signin');
+    final url = Uri.parse('$baseUrl/users/login');
     final response = await http.post(url, body: {
       'email': email,
       'password': password,
