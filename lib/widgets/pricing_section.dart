@@ -5,269 +5,248 @@ class PricingSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth > 900;
+    final isTablet = screenWidth > 600 && screenWidth <= 900;
+
+    // Pre-calculate responsive values
+    final verticalPadding = isDesktop ? 100.0 : 70.0;
+    final horizontalPadding = isDesktop ? 60.0 : 24.0;
+    final headingFontSize = isDesktop ? 44.0 : (isTablet ? 36.0 : 28.0);
+    final subtitleFontSize = isDesktop ? 16.0 : 15.0;
+    final spacingAfterSubtitle = isDesktop ? 80.0 : 50.0;
+
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 80, horizontal: 40),
+      padding: EdgeInsets.symmetric(
+        vertical: verticalPadding,
+        horizontal: horizontalPadding,
+      ),
       color: const Color.fromARGB(255, 232, 241, 240),
       child: Column(
         children: [
-          // "PRICING" label
+          // Label
           Text(
             'PRICING',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               letterSpacing: 1.2,
-              color: Color(0xFF68B2AD),
+              color: const Color(0xFF68B2AD),
             ),
           ),
           const SizedBox(height: 16),
 
-          // Main heading
-          const Text(
+          // Main Heading
+          Text(
             'Affordable pet HMO plans',
             style: TextStyle(
-              fontSize: 44,
+              fontSize: headingFontSize,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF2C6975),
+              color: const Color(0xFF2C6975),
+              height: 1.1,
             ),
+            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
           // Subtitle
-          const Text(
+          Text(
             'Choose a plan that fits your budget. Cancel anytime.',
             style: TextStyle(
-              fontSize: 16,
-              color: Color(0xFF5A7C86),
+              fontSize: subtitleFontSize,
+              color: const Color(0xFF5A7C86),
             ),
+            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 80),
+          SizedBox(height: spacingAfterSubtitle),   // ← Fixed: Removed 'const'
 
-          // Pricing cards
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Basic plan
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(40),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
-                        blurRadius: 16,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Basic',
-                        style: const TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF2C6975),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      const Text(
-                        'Essential pet healthcare coverage',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Color(0xFF5A7C86),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
-                        children: const [
-                          Text(
-                            '₦2,500',
-                            style: TextStyle(
-                              fontSize: 36,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF2C6975),
-                            ),
-                          ),
-                          SizedBox(width: 8),
-                          Text(
-                            '/month',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Color(0xFF5A7C86),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 32),
-                      _featureItem('Pet profile management'),
-                      _featureItem('Health record tracking'),
-                      _featureItem('1 vet chat per month'),
-                      _featureItem('Vaccination reminders'),
-                      _featureItem('Email support'),
-                      const SizedBox(height: 32),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF2C6975),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: const Text(
-                            'Get Started',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+          // Pricing Cards
+          isDesktop
+              ? _buildDesktopLayout()
+              : _buildMobileLayout(isTablet),
+        ],
+      ),
+    );
+  }
+
+  // Desktop Layout (Side by side)
+  Widget _buildDesktopLayout() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: _buildBasicPlan()),
+        const SizedBox(width: 32),
+        Expanded(child: _buildPremiumPlan(isPopular: true)),
+      ],
+    );
+  }
+
+  // Mobile & Tablet Layout (Stacked)
+  Widget _buildMobileLayout(bool isTablet) {
+    return Column(
+      children: [
+        _buildBasicPlan(),
+        const SizedBox(height: 32),
+        _buildPremiumPlan(isPopular: true),
+      ],
+    );
+  }
+
+  // Basic Plan Card
+  Widget _buildBasicPlan() {
+    return _pricingCard(
+      title: 'Basic',
+      subtitle: 'Essential pet healthcare coverage',
+      price: '2,500',
+      features: [
+        'Pet profile management',
+        'Health record tracking',
+        '1 vet chat per month',
+        'Vaccination reminders',
+        'Email support',
+      ],
+      buttonColor: const Color(0xFF2C6975),
+      buttonTextColor: Colors.white,
+      isPopular: false,
+    );
+  }
+
+  // Premium Plan Card
+  Widget _buildPremiumPlan({required bool isPopular}) {
+    return _pricingCard(
+      title: 'Premium',
+      subtitle: 'Complete care for your furry family',
+      price: '5,000',
+      features: [
+        'Everything in Basic',
+        'Unlimited vet chats',
+        'Priority vet booking',
+        'Health analytics dashboard',
+        '24/7 emergency support',
+        'Family plan (up to 3 pets)',
+      ],
+      buttonColor: const Color(0xFF68B2AD),
+      buttonTextColor: const Color(0xFF2C6975),
+      isPopular: isPopular,
+    );
+  }
+
+  // Reusable Pricing Card
+  Widget _pricingCard({
+    required String title,
+    required String subtitle,
+    required String price,
+    required List<String> features,
+    required Color buttonColor,
+    required Color buttonTextColor,
+    required bool isPopular,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(40),
+      decoration: BoxDecoration(
+        color: isPopular ? const Color(0xFF2C6975) : Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.12),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (isPopular)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF68B2AD).withOpacity(0.25),
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: const Text(
+                'Most Popular',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
                 ),
               ),
-              const SizedBox(width: 32),
+            ),
 
-              // Premium plan (Most Popular)
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(40),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2C6975),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF2C6975).withOpacity(0.3),
-                        blurRadius: 16,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // "Most Popular" badge
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF68B2AD).withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Text(
-                          'Most Popular',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Premium',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      const Text(
-                        'Complete care for your furry family',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Color(0xFF68B2AD),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
-                        children: const [
-                          Text(
-                            '₦5,000',
-                            style: TextStyle(
-                              fontSize: 36,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          SizedBox(width: 8),
-                          Text(
-                            '/month',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Color(0xFF68B2AD),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 32),
-                      _featureItemWhite('Everything in Basic'),
-                      _featureItemWhite('Unlimited vet chats'),
-                      _featureItemWhite('Priority vet booking'),
-                      _featureItemWhite('Health analytics dashboard'),
-                      _featureItemWhite('24/7 emergency support'),
-                      _featureItemWhite('Family plan (up to 3 pets)'),
-                      const SizedBox(height: 32),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF68B2AD),
-                            foregroundColor: const Color(0xFF2C6975),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: const Text(
-                            'Get Started',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+          const SizedBox(height: 20),
+
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: isPopular ? Colors.white : const Color(0xFF2C6975),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            subtitle,
+            style: TextStyle(
+              fontSize: 15,
+              color: isPopular ? const Color(0xFF68B2AD) : const Color(0xFF5A7C86),
+            ),
+          ),
+
+          const SizedBox(height: 32),
+
+          // Price
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                '₦$price',
+                style: TextStyle(
+                  fontSize: 42,
+                  fontWeight: FontWeight.bold,
+                  color: isPopular ? Colors.white : const Color(0xFF2C6975),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '/month',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: isPopular ? const Color(0xFF68B2AD) : const Color(0xFF5A7C86),
                 ),
               ),
             ],
           ),
-        ],
-      ),
-    );
-  }
 
-  Widget _featureItem(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          const Icon(
-            Icons.check,
-            size: 20,
-            color: Color(0xFF2C6975),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            text,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFF2C6975),
+          const SizedBox(height: 40),
+
+          // Features
+          ...features.map((feature) => _featureItem(feature, isPopular)),
+
+          const SizedBox(height: 40),
+
+          // Button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: buttonColor,
+                foregroundColor: buttonTextColor,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                elevation: isPopular ? 4 : 0,
+              ),
+              child: const Text(
+                'Get Started',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ),
         ],
@@ -275,22 +254,25 @@ class PricingSection extends StatelessWidget {
     );
   }
 
-  Widget _featureItemWhite(String text) {
+  Widget _featureItem(String text, bool isPopular) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 14),
       child: Row(
         children: [
-          const Icon(
-            Icons.check,
-            size: 20,
-            color: Colors.white,
+          Icon(
+            Icons.check_circle,
+            size: 22,
+            color: isPopular ? Colors.white : const Color(0xFF2C6975),
           ),
           const SizedBox(width: 12),
-          Text(
-            text,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.white,
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 15,
+                color: isPopular ? Colors.white : const Color(0xFF2C6975),
+                height: 1.4,
+              ),
             ),
           ),
         ],

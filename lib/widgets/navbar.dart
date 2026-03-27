@@ -114,7 +114,7 @@ class Navbar extends StatelessWidget {
   }
 
   void _scrollToSection(BuildContext context, double offset) {
-    // Removed unnecessary null check - PrimaryScrollController.of(context) is never null here
+    
     PrimaryScrollController.of(context).animateTo(
       offset,
       duration: const Duration(milliseconds: 800),
