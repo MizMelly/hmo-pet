@@ -24,11 +24,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   setState(() => _isLoading = true);
 
   try {
-    // Pass arguments positionally in the order defined in ApiService
     final response = await ApiService.register(
-      _emailController.text.trim(),   // email
-      _passwordController.text,       // password
-      _fullnameController.text.trim(),// fullname
+      _emailController.text.trim(),
+      _passwordController.text,
+      _fullnameController.text.trim(),
     );
 
     final token = response['token'] ?? response['data']?['token'];

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/auth_storage.dart';
-import '../services/api_service.dart'; 
+import '../services/api_service.dart';
+import 'home_screen.dart'; // Make sure this exists
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -14,7 +15,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  bool _isLoading = false; // ✅ Loading state
+  bool _isLoading = false;
 
   void _signIn() async {
     final email = _emailController.text.trim();
@@ -37,24 +38,27 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
+      // Use ApiService with Vercel proxy
       final response = await ApiService.login(email, password);
 
-      final token = response['token'] ?? response['data']?['token']; // ✅ Safe token check
-
+      final token = response['token'] ?? response['data']?['token'];
       if (token != null) {
-        await AuthStorage.saveToken(token); // ✅ Save token
+        await AuthStorage.saveToken(token);
 
-        Navigator.of(context).pushReplacementNamed('/dashboard');
+        // Navigate directly to HomeScreen (avoids named routes)
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+        );
       } else {
-        throw Exception("Token not found");
+        throw Exception("Token not returned");
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
+        SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
       );
+    } finally {
+      setState(() => _isLoading = false);
     }
-
-    setState(() => _isLoading = false);
   }
 
   bool _isValidEmail(String email) {
@@ -180,20 +184,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            _socialButton(
-              icon: Icons.g_translate,
-              label: 'Continue with Google',
-              color: const Color(0xFFDADFE6),
-              onTap: () {},
-            ),
-            const SizedBox(height: 12),
-            _socialButton(
-              icon: Icons.facebook,
-              label: 'Continue with Facebook',
-              color: const Color(0xFFDADFE6),
-              onTap: () {},
-            ),
-            const SizedBox(height: 16),
             Row(
               children: const [
                 Expanded(child: Divider(color: Color(0xFFE0E8E7))),
@@ -240,17 +230,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: 10),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () {},
-                child: const Text(
-                  'Forgot password?',
-                  style: TextStyle(color: Color(0xFF2C6975)),
-                ),
-              ),
-            ),
             const SizedBox(height: 14),
             FilledButton(
               key: const Key('login_submit'),
@@ -264,12 +243,17 @@ class _LoginScreenState extends State<LoginScreen> {
               style: FilledButton.styleFrom(
                 backgroundColor: const Color(0xFF2C6975),
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 elevation: 4,
               ),
               child: _isLoading
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text('Sign In', style: TextStyle(fontSize: 20, color: Colors.white)),
+                  : const Text(
+                      'Sign In',
+                      style: TextStyle(fontSize: 20, color: Colors.white),
+                    ),
             ),
             const SizedBox(height: 20),
             Center(
@@ -284,26 +268,6 @@ class _LoginScreenState extends State<LoginScreen> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _socialButton({
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return OutlinedButton.icon(
-      style: OutlinedButton.styleFrom(
-        backgroundColor: color,
-        foregroundColor: const Color(0xFF2C6975),
-        side: const BorderSide(color: Color(0xFFB6D1CF)),
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 18),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      ),
-      icon: Icon(icon, color: const Color(0xFF2C6975)),
-      label: Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-      onPressed: onTap,
     );
   }
 

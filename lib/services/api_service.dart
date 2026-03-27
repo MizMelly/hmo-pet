@@ -2,19 +2,16 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const baseUrl = "https://hmo-pet.vercel.app/api";
+  // Use your Vercel proxy
+  static const String baseUrl = "https://hmo-pet.vercel.app/api";
 
-  /// 🔐 REGISTER
+  // REGISTER
   static Future<Map<String, dynamic>> register(
       String email, String password, String fullname) async {
-
-    final url = Uri.parse('$baseUrl/register');
-
+    final url = Uri.parse('$baseUrl/register'); // ✅ add /register
     final response = await http.post(
       url,
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: {"Content-Type": "application/json"},
       body: jsonEncode({
         'email': email,
         'password': password,
@@ -22,39 +19,29 @@ class ApiService {
       }),
     );
 
-    return _handleResponse(response, "register");
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to register: ${response.body}');
+    }
   }
 
-  /// 🔐 LOGIN
-  static Future<Map<String, dynamic>> login(
-      String email, String password) async {
-
-    final url = Uri.parse('$baseUrl/login');
-
+  // LOGIN
+  static Future<Map<String, dynamic>> login(String email, String password) async {
+    final url = Uri.parse('$baseUrl/login'); // ✅ add /login
     final response = await http.post(
       url,
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: {"Content-Type": "application/json"},
       body: jsonEncode({
         'email': email,
         'password': password,
       }),
     );
 
-    return _handleResponse(response, "login");
-  }
-
-  /// 🔥 RESPONSE HANDLER
-  static Map<String, dynamic> _handleResponse(
-      http.Response response, String action) {
-
-    print("📡 $action RESPONSE: ${response.body}");
-
-    if (response.statusCode == 200 || response.statusCode == 201) {
+    if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('$action failed: ${response.body}');
+      throw Exception('Failed to login: ${response.body}');
     }
   }
 }

@@ -43,3 +43,16 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+# Flutter & local files
+.dart_tool/
+build/         # we will add build/web manually
+.idea/
+*.iml
+pubspec.lock
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# OS files
+.DS_Store
+Thumbs.db
