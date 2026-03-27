@@ -27367,7 +27367,7 @@ r.toString
 q.push(r)}return q},
 Z6(a,b,c){var s=0,r=A.N(t.a),q,p,o,n,m
 var $async$Z6=A.O(function(d,e){if(d===1)return A.K(e,r)
-for(;;)switch(s){case 0:p=A.hj("https://hmo-pet.vercel.app/api")
+for(;;)switch(s){case 0:p=A.hj("https://hmo-pet.vercel.app/api/register")
 o=t.N
 n=A.aj(["Content-Type","application/json"],o,o)
 s=3
@@ -27381,7 +27381,7 @@ case 1:return A.L(q,r)}})
 return A.M($async$Z6,r)},
 Z5(a,b){var s=0,r=A.N(t.a),q,p,o,n,m
 var $async$Z5=A.O(function(c,d){if(c===1)return A.K(d,r)
-for(;;)switch(s){case 0:p=A.hj("https://hmo-pet.vercel.app/api")
+for(;;)switch(s){case 0:p=A.hj("https://hmo-pet.vercel.app/api/login")
 o=t.N
 n=A.aj(["Content-Type","application/json"],o,o)
 s=3
