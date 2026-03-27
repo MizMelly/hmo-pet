@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../services/auth_storage.dart';
 import '../services/api_service.dart';
-import 'home_screen.dart'; // Make sure this exists
+import 'home_screen.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,46 +20,50 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _signIn() async {
     final email = _emailController.text.trim();
-    final password = _passwordController.text;
+    final password = _passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email and password are required')),
-      );
+      _showSnackBar('Email and password are required');
       return;
     }
 
     if (!_isValidEmail(email)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid email address')),
-      );
+      _showSnackBar('Please enter a valid email address');
       return;
     }
 
     setState(() => _isLoading = true);
 
     try {
-      // Use ApiService with Vercel proxy
-      final response = await ApiService.login(email, password);
+      final response = await ApiService.login(
+        email: email,
+        password: password,
+      );
 
-      final token = response['token'] ?? response['data']?['token'];
-      if (token != null) {
-        await AuthStorage.saveToken(token);
+      final token = response['token'] ??
+          response['data']?['token'] ??
+          response['access_token'];
 
-        // Navigate directly to HomeScreen (avoids named routes)
+      if (token != null && token.toString().isNotEmpty) {
+        await AuthStorage.saveToken(token.toString());
+
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const HomeScreen()),
         );
       } else {
-        throw Exception("Token not returned");
+        throw Exception("Token not returned from server");
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
-      );
+      _showSnackBar(e.toString().replaceAll('Exception: ', ''));
     } finally {
       setState(() => _isLoading = false);
     }
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   bool _isValidEmail(String email) {
@@ -94,14 +99,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       ? Row(
                           children: [
                             _leftPanel(),
-                            Expanded(child: _formPanel(context)),
+                            Expanded(child: _formPanel()),
                           ],
                         )
                       : SingleChildScrollView(
                           child: Column(
                             children: [
                               _leftPanel(),
-                              _formPanel(context),
+                              _formPanel(),
                             ],
                           ),
                         ),
@@ -157,16 +162,39 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _formPanel(BuildContext context) {
+  // Updated _formPanel with "← Back to login" like your image
+  Widget _formPanel() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
       child: Form(
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: 16),
+            // ← Back to login  (Exactly like your image)
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Color(0xFF2C6975), size: 28),
+                  onPressed: () => Navigator.pop(context),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  'Back to login',
+                  style: TextStyle(
+                    color: Color(0xFF2C6975),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 17,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 32),
+
             const Text(
               'Welcome back',
               style: TextStyle(
@@ -183,7 +211,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 fontSize: 20,
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 32),
+
             Row(
               children: const [
                 Expanded(child: Divider(color: Color(0xFFE0E8E7))),
@@ -200,23 +229,21 @@ class _LoginScreenState extends State<LoginScreen> {
                 Expanded(child: Divider(color: Color(0xFFE0E8E7))),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
+
             _inputField(
               controller: _emailController,
               label: 'Email',
               hint: 'you@example.com',
               icon: Icons.email,
               validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Enter your email';
-                }
-                if (!_isValidEmail(value.trim())) {
-                  return 'Enter a valid email';
-                }
+                if (value == null || value.trim().isEmpty) return 'Enter your email';
+                if (!_isValidEmail(value.trim())) return 'Enter a valid email';
                 return null;
               },
             ),
             const SizedBox(height: 16),
+
             _inputField(
               controller: _passwordController,
               label: 'Password',
@@ -224,13 +251,12 @@ class _LoginScreenState extends State<LoginScreen> {
               icon: Icons.lock,
               obscureText: true,
               validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Enter your password';
-                }
+                if (value == null || value.isEmpty) return 'Enter your password';
                 return null;
               },
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 24),
+
             FilledButton(
               key: const Key('login_submit'),
               onPressed: _isLoading
@@ -243,9 +269,7 @@ class _LoginScreenState extends State<LoginScreen> {
               style: FilledButton.styleFrom(
                 backgroundColor: const Color(0xFF2C6975),
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 elevation: 4,
               ),
               child: _isLoading
@@ -255,13 +279,22 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: TextStyle(fontSize: 20, color: Colors.white),
                     ),
             ),
-            const SizedBox(height: 20),
+
+            const SizedBox(height: 24),
             Center(
               child: TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                  );
+                },
                 child: const Text(
-                  'Don\'t have an account? Create account',
-                  style: TextStyle(color: Color(0xFF2C6975), fontWeight: FontWeight.bold),
+                  "Don't have an account? Create account",
+                  style: TextStyle(
+                    color: Color(0xFF2C6975),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),

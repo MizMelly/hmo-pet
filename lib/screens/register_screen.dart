@@ -16,35 +16,50 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+
   bool _isLoading = false;
 
- void _register() async {
-  if (!_formKey.currentState!.validate()) return;
+  // ✅ Updated _register method
+  void _register() async {
+    if (!_formKey.currentState!.validate()) return;
 
-  setState(() => _isLoading = true);
+    setState(() => _isLoading = true);
 
-  try {
-    final response = await ApiService.register(
-      _emailController.text.trim(),
-      _passwordController.text,
-      _fullnameController.text.trim(),
-    );
+    try {
+      // ✅ Corrected: Using named parameters to match ApiService
+      final response = await ApiService.register(
+        fullname: _fullnameController.text.trim(),
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
 
-    final token = response['token'] ?? response['data']?['token'];
-    if (token != null) {
-      await AuthStorage.saveToken(token);
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => const HomeScreen()));
-    } else {
-      throw Exception("Token not returned");
+      // Handle different possible token structures
+      final token = response['token'] ??
+          response['data']?['token'] ??
+          response['access_token'];
+
+      if (token != null && token.toString().isNotEmpty) {
+        await AuthStorage.saveToken(token.toString());
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+        );
+      } else {
+        throw Exception("Token not returned from server");
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString().replaceAll('Exception: ', '')),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() => _isLoading = false);
     }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))));
-  } finally {
-    setState(() => _isLoading = false);
   }
-}
+
   bool _isValidEmail(String email) =>
       RegExp(r"^[^\s@]+@[^\s@]+\.[^\s@]+$").hasMatch(email);
 
@@ -124,9 +139,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
             Text(
               'Simba+',
               style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 56,
-                  fontWeight: FontWeight.bold),
+                color: Colors.white,
+                fontSize: 56,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             SizedBox(height: 16),
             Text(
@@ -155,53 +171,84 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   onPressed: () => Navigator.pop(context),
                 ),
                 const SizedBox(width: 8),
-                const Text('Back to login',
-                    style: TextStyle(
-                        color: Color(0xFF2C6975),
-                        fontWeight: FontWeight.w600)),
+                const Text(
+                  'Back to login',
+                  style: TextStyle(
+                    color: Color(0xFF2C6975),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 16),
-            const Text('Create account',
-                style: TextStyle(
-                    color: Color(0xFF0F3E49),
-                    fontSize: 38,
-                    fontWeight: FontWeight.bold)),
+            const Text(
+              'Create account',
+              style: TextStyle(
+                color: Color(0xFF0F3E49),
+                fontSize: 38,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: 8),
-            const Text('Join Simba+ and care for your pet',
-                style: TextStyle(color: Color(0xFF2C6975), fontSize: 20)),
+            const Text(
+              'Join Simba+ and care for your pet',
+              style: TextStyle(color: Color(0xFF2C6975), fontSize: 20),
+            ),
             const SizedBox(height: 20),
-            _inputField(_fullnameController, 'Full Name', 'John Doe', Icons.person),
+            _inputField(
+              _fullnameController,
+              'Full Name',
+              'John Doe',
+              Icons.person,
+            ),
             const SizedBox(height: 16),
-            _inputField(_emailController, 'Email', 'you@example.com', Icons.email),
+            _inputField(
+              _emailController,
+              'Email',
+              'you@example.com',
+              Icons.email,
+            ),
             const SizedBox(height: 16),
-            _inputField(_passwordController, 'Password', '••••••••', Icons.lock,
-                obscureText: true),
+            _inputField(
+              _passwordController,
+              'Password',
+              '••••••••',
+              Icons.lock,
+              obscureText: true,
+            ),
             const SizedBox(height: 24),
             FilledButton(
               onPressed: _isLoading ? null : _register,
               style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF2C6975),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16))),
+                backgroundColor: const Color(0xFF2C6975),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
               child: _isLoading
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text('Create Account',
-                      style: TextStyle(fontSize: 20, color: Colors.white)),
+                  : const Text(
+                      'Create Account',
+                      style: TextStyle(fontSize: 20, color: Colors.white),
+                    ),
             ),
             const SizedBox(height: 20),
             Center(
               child: TextButton(
                 onPressed: () {
                   Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => const LoginScreen()));
+                    context,
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                  );
                 },
-                child: const Text('Already have an account? Sign in',
-                    style: TextStyle(
-                        color: Color(0xFF2C6975), fontWeight: FontWeight.bold)),
+                child: const Text(
+                  'Already have an account? Sign in',
+                  style: TextStyle(
+                    color: Color(0xFF2C6975),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
           ],
@@ -210,15 +257,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget _inputField(TextEditingController controller, String label, String hint,
-      IconData icon,
-      {bool obscureText = false}) {
+  Widget _inputField(
+    TextEditingController controller,
+    String label,
+    String hint,
+    IconData icon, {
+    bool obscureText = false,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label,
-            style: const TextStyle(
-                fontWeight: FontWeight.w600, color: Color(0xFF2C6975))),
+        Text(
+          label,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF2C6975),
+          ),
+        ),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
@@ -234,7 +289,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
             prefixIcon: Icon(icon, color: const Color(0xFF2C6975)),
             hintText: hint,
             border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide.none,
+            ),
           ),
         ),
       ],

@@ -4,24 +4,27 @@ class Navbar extends StatelessWidget {
   final VoidCallback onLoginPressed;
   final VoidCallback onGetStartedPressed;
 
-  const Navbar({super.key, required this.onLoginPressed, required this.onGetStartedPressed});
+  const Navbar({
+    super.key,
+    required this.onLoginPressed,
+    required this.onGetStartedPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final isSmall = constraints.maxWidth < 800;
+          final isSmall = constraints.maxWidth < 900;
 
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // Branding
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: const [
+              const Row(
+                children: [
                   Icon(Icons.favorite, color: Color(0xFF2C6975), size: 28),
                   SizedBox(width: 8),
                   Text(
@@ -43,19 +46,19 @@ class Navbar extends StatelessWidget {
                 ],
               ),
 
-              // Center links on large screens
+              // Navigation Links (Desktop only)
               if (!isSmall)
                 Row(
                   children: [
-                    _navLink('Features'),
-                    const SizedBox(width: 24),
-                    _navLink('How It Works'),
-                    const SizedBox(width: 24),
-                    _navLink('Pricing'),
+                    _navLink(context, 'Features', 800),
+                    const SizedBox(width: 32),
+                    _navLink(context, 'How It Works', 1600),
+                    const SizedBox(width: 32),
+                    _navLink(context, 'Pricing', 2400),
                   ],
                 ),
 
-              // Right actions
+              // Right side - Login & Get Started
               Row(
                 children: [
                   TextButton(
@@ -69,15 +72,15 @@ class Navbar extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 16),
                   ElevatedButton(
                     onPressed: onGetStartedPressed,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF2C6975),
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      elevation: 4,
+                      elevation: 3,
                     ),
                     child: const Text(
                       'Get Started',
@@ -93,11 +96,11 @@ class Navbar extends StatelessWidget {
     );
   }
 
-  Widget _navLink(String title) {
+  Widget _navLink(BuildContext context, String title, double scrollOffset) {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: TextButton(
-        onPressed: () {},
+        onPressed: () => _scrollToSection(context, scrollOffset),
         child: Text(
           title,
           style: const TextStyle(
@@ -107,6 +110,15 @@ class Navbar extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  void _scrollToSection(BuildContext context, double offset) {
+    // Removed unnecessary null check - PrimaryScrollController.of(context) is never null here
+    PrimaryScrollController.of(context).animateTo(
+      offset,
+      duration: const Duration(milliseconds: 800),
+      curve: Curves.easeInOut,
     );
   }
 }

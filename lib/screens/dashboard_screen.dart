@@ -5,17 +5,20 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isSmallScreen = size.width < 600;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAF9),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        title: const Text(
+        title: Text(
           'Welcome Joy',
           style: TextStyle(
             color: Colors.black87,
             fontWeight: FontWeight.w600,
-            fontSize: 20,
+            fontSize: isSmallScreen ? 18 : 22,
           ),
         ),
         leading: const Icon(Icons.pets, color: Color(0xFF2C6975), size: 28),
@@ -27,27 +30,12 @@ class DashboardScreen extends StatelessWidget {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Search Bar
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFE0E8E7)),
-              ),
-              child: const TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search',
-                  prefixIcon: Icon(Icons.search, color: Color(0xFF2C6975)),
-                  suffixIcon: Icon(Icons.tune, color: Color(0xFF2C6975)),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(vertical: 14),
-                ),
-              ),
-            ),
+            _buildSearchBar(isSmallScreen),
 
             const SizedBox(height: 24),
 
@@ -55,50 +43,28 @@ class DashboardScreen extends StatelessWidget {
             const Text(
               'Overview',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 22,
                 fontWeight: FontWeight.w700,
                 color: Colors.black87,
               ),
             ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _ServiceCard(
-                  icon: Icons.medical_services,
-                  label: 'Veterinary',
-                  color: const Color(0xFF2C6975),
-                ),
-                _ServiceCard(
-                  icon: Icons.cut,
-                  label: 'Grooming',
-                  color: const Color(0xFF2C6975),
-                ),
-                _ServiceCard(
-                  icon: Icons.home,
-                  label: 'Boarding',
-                  color: const Color(0xFF2C6975),
-                ),
-                _ServiceCard(
-                  icon: Icons.monetization_on_outlined,
-                  label: 'Training',
-                  color: const Color(0xFF2C6975),
-                ),
-              ],
-            ),
+            const SizedBox(height: 16),
 
-            const SizedBox(height: 28),
+            // Responsive Service Cards Grid
+            _buildServiceGrid(isSmallScreen),
 
-            // Upcoming Appointment Section
+            const SizedBox(height: 32),
+
+            // Upcoming Appointments
             const Text(
-              'Upcoming Appointment',
+              'Upcoming Appointments',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 22,
                 fontWeight: FontWeight.w700,
                 color: Colors.black87,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
 
             _AppointmentCard(
               date: 'Apr 2 2026',
@@ -122,9 +88,63 @@ class DashboardScreen extends StatelessWidget {
       ),
     );
   }
+
+  // Responsive Search Bar
+  Widget _buildSearchBar(bool isSmallScreen) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE0E8E7)),
+      ),
+      child: TextField(
+        decoration: InputDecoration(
+          hintText: 'Search services or pets...',
+          prefixIcon: const Icon(Icons.search, color: Color(0xFF2C6975)),
+          suffixIcon: const Icon(Icons.tune, color: Color(0xFF2C6975)),
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.symmetric(
+            vertical: isSmallScreen ? 12 : 14,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Responsive Service Cards using GridView
+  Widget _buildServiceGrid(bool isSmallScreen) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: isSmallScreen ? 2 : 4,        // 2 on mobile, 4 on larger screens
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 16,
+        childAspectRatio: isSmallScreen ? 1.1 : 1.0,  // Better height balance
+      ),
+      itemCount: 4,
+      itemBuilder: (context, index) {
+        final services = [
+          {'icon': Icons.medical_services, 'label': 'Veterinary'},
+          {'icon': Icons.cut, 'label': 'Grooming'},
+          {'icon': Icons.home, 'label': 'Boarding'},
+          {'icon': Icons.monetization_on_outlined, 'label': 'Training'},
+        ];
+
+        final service = services[index];
+
+        return _ServiceCard(
+          icon: service['icon'] as IconData,
+          label: service['label'] as String,
+          color: const Color(0xFF2C6975),
+        );
+      },
+    );
+  }
 }
 
-// Service Card Widget (Overview)
+// ==================== Reusable Widgets ====================
+
 class _ServiceCard extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -141,29 +161,29 @@ class _ServiceCard extends StatelessWidget {
     return Column(
       children: [
         Container(
-          width: 70,
-          height: 70,
+          width: double.infinity,
+          height: 80,
           decoration: BoxDecoration(
             color: const Color(0xFFE6F0EE),
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Icon(icon, size: 32, color: color),
+          child: Icon(icon, size: 34, color: color),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         Text(
           label,
           style: const TextStyle(
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: FontWeight.w600,
             color: Colors.black87,
           ),
+          textAlign: TextAlign.center,
         ),
       ],
     );
   }
 }
 
-// Appointment Card Widget (Upcoming Appointment)
 class _AppointmentCard extends StatelessWidget {
   final String date;
   final String pet;
@@ -177,6 +197,8 @@ class _AppointmentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dateParts = date.split(' ');
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -186,10 +208,10 @@ class _AppointmentCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Date Container
+          // Date Box
           Container(
-            width: 60,
-            padding: const EdgeInsets.symmetric(vertical: 8),
+            width: 68,
+            padding: const EdgeInsets.symmetric(vertical: 10),
             decoration: BoxDecoration(
               color: const Color(0xFFE6F0EE),
               borderRadius: BorderRadius.circular(12),
@@ -197,7 +219,7 @@ class _AppointmentCard extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  date.split(' ')[0], // e.g., "Apr"
+                  dateParts[0],
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -205,24 +227,23 @@ class _AppointmentCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  date.split(' ')[1], // e.g., "2"
+                  dateParts[1],
                   style: const TextStyle(
-                    fontSize: 20,
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF2C6975),
                   ),
                 ),
                 Text(
-                  date.split(' ')[2], // e.g., "2026"
-                  style: const TextStyle(
-                    fontSize: 10,
-                    color: Colors.black54,
-                  ),
+                  dateParts[2],
+                  style: const TextStyle(fontSize: 10, color: Colors.black54),
                 ),
               ],
             ),
           ),
           const SizedBox(width: 16),
+
+          // Pet & Service Info
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,7 +252,7 @@ class _AppointmentCard extends StatelessWidget {
                   pet,
                   style: const TextStyle(
                     fontWeight: FontWeight.w700,
-                    fontSize: 16,
+                    fontSize: 17,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -239,13 +260,14 @@ class _AppointmentCard extends StatelessWidget {
                   service,
                   style: const TextStyle(
                     color: Colors.black54,
-                    fontSize: 14,
+                    fontSize: 15,
                   ),
                 ),
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: Color(0xFF2C6975), size: 28),
+
+          const Icon(Icons.chevron_right, color: Color(0xFF2C6975), size: 30),
         ],
       ),
     );

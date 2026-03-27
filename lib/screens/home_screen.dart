@@ -8,16 +8,16 @@ import '../widgets/footer.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // Scrollable content with top padding for sticky navbar
-          SingleChildScrollView(
+          const SingleChildScrollView(
             child: Column(
               children: [
-                const SizedBox(height: 70), 
+                SizedBox(height: 80),
                 HeroSection(),
                 FeaturesSection(),
                 HowItWorksSection(),
@@ -26,25 +26,37 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
           ),
-          // Fixed navbar at top
-          Positioned(
+
+          // Sticky Navbar
+          const Positioned(
             top: 0,
             left: 0,
             right: 0,
-            child: Container(
-              color: Colors.white,
-              child: Navbar(
-                onLoginPressed: () {
-                  Navigator.of(context).pushNamed('/login');
-                },
-                onGetStartedPressed: () {
-                  Navigator.of(context).pushNamed('/register');
-                },
-              ),
-            ),
+            child: _StickyNavbar(),
           ),
         ],
       ),
     );
+  }
+}
+
+// Extracted widget for navbar (clean and const-friendly)
+class _StickyNavbar extends StatelessWidget {
+  const _StickyNavbar({super.key});   // Proper constructor with key
+
+  @override
+  Widget build(BuildContext context) {
+    return Navbar(
+      onLoginPressed: () => _navigateToLogin(context),
+      onGetStartedPressed: () => _navigateToRegister(context),
+    );
+  }
+
+  void _navigateToLogin(BuildContext context) {
+    Navigator.of(context).pushNamed('/login');
+  }
+
+  void _navigateToRegister(BuildContext context) {
+    Navigator.of(context).pushNamed('/register');
   }
 }
