@@ -27499,7 +27499,7 @@ r.toString
 q.push(r)}return q},
 Zq(a,b,c){var s=0,r=A.M(t.a),q,p,o,n,m
 var $async$Zq=A.N(function(d,e){if(d===1)return A.J(e,r)
-for(;;)switch(s){case 0:p=A.fR("https://simba-39la.onrender.com/api/users/register")
+for(;;)switch(s){case 0:p=A.fR("https://simba-39la.onrender.com/api/register")
 o=t.N
 n=A.aa(["Content-Type","application/json"],o,o)
 m=A
@@ -27512,7 +27512,7 @@ case 1:return A.K(q,r)}})
 return A.L($async$Zq,r)},
 Zp(a,b){var s=0,r=A.M(t.a),q,p,o,n,m
 var $async$Zp=A.N(function(c,d){if(c===1)return A.J(d,r)
-for(;;)switch(s){case 0:p=A.fR("https://simba-39la.onrender.com/api/users/signin")
+for(;;)switch(s){case 0:p=A.fR("https://simba-39la.onrender.com/api/login")
 o=t.N
 n=A.aa(["Content-Type","application/json"],o,o)
 m=A

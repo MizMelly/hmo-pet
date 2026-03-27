@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  // Base URL now includes /api
-  static const String baseUrl = "https://simba-39la.onrender.com";
+  // Base URL points to the API root
+  static const String baseUrl = "https://simba-39la.onrender.com/api";
 
   // ====================== AUTH ======================
   static Future<Map<String, dynamic>> register({
@@ -12,7 +12,7 @@ class ApiService {
     required String email,
     required String password,
   }) async {
-    final url = Uri.parse('$baseUrl/api/users/register');
+    final url = Uri.parse('$baseUrl/register'); // ✅ Correct endpoint
 
     final response = await http.post(
       url,
@@ -31,7 +31,7 @@ class ApiService {
     required String email,
     required String password,
   }) async {
-    final url = Uri.parse('$baseUrl/api/users/signin');
+    final url = Uri.parse('$baseUrl/login'); // ✅ Correct endpoint
 
     final response = await http.post(
       url,
@@ -48,7 +48,7 @@ class ApiService {
   // ====================== PROTECTED ROUTES ======================
   static Future<Map<String, dynamic>> getProfile(String token) async {
     final response = await http.get(
-      Uri.parse("$baseUrl/api/users/profile"),
+      Uri.parse("$baseUrl/users/profile"),
       headers: {
         "Authorization": "Bearer $token",
         "Content-Type": "application/json",
@@ -59,7 +59,7 @@ class ApiService {
 
   static Future<List<dynamic>> getPets(String token) async {
     final response = await http.get(
-      Uri.parse("$baseUrl/api/users/pets"),
+      Uri.parse("$baseUrl/pets"),
       headers: {"Authorization": "Bearer $token"},
     );
     final data = _handleResponse(response, "Failed to load pets");
@@ -68,7 +68,7 @@ class ApiService {
 
   static Future<List<dynamic>> getVaccinations(String token) async {
     final response = await http.get(
-      Uri.parse("$baseUrl/api/users/vaccinations"),
+      Uri.parse("$baseUrl/users/vaccinations"),
       headers: {"Authorization": "Bearer $token"},
     );
     final data = _handleResponse(response, "Failed to load vaccinations");
@@ -77,7 +77,7 @@ class ApiService {
 
   static Future<List<dynamic>> getPlans(String token) async {
     final response = await http.get(
-      Uri.parse("$baseUrl/api/users/plans"),
+      Uri.parse("$baseUrl/users/plans"),
       headers: {"Authorization": "Bearer $token"},
     );
     final data = _handleResponse(response, "Failed to load plans");
