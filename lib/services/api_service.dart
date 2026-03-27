@@ -3,7 +3,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String baseUrl = "https://simba-39la.onrender.com";
+  // Base URL now includes /api
+  static const String baseUrl = "https://simba-39la.onrender.com/api";
 
   // ====================== AUTH ======================
   static Future<Map<String, dynamic>> register({
@@ -15,21 +16,15 @@ class ApiService {
 
     final response = await http.post(
       url,
-      headers: {"Content-Type": "application/x-www-form-urlencoded"},
-      body: {
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
         'fullname': fullname,
         'email': email,
         'password': password,
-      },
+      }),
     );
 
-    final body = jsonDecode(response.body);
-
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      return body;
-    } else {
-      throw Exception(body['message'] ?? body['error'] ?? 'Registration failed');
-    }
+    return _handleResponse(response, "Registration failed");
   }
 
   static Future<Map<String, dynamic>> login({
@@ -40,26 +35,20 @@ class ApiService {
 
     final response = await http.post(
       url,
-      headers: {"Content-Type": "application/x-www-form-urlencoded"},
-      body: {
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
         'email': email,
         'password': password,
-      },
+      }),
     );
 
-    final body = jsonDecode(response.body);
-
-    if (response.statusCode == 200) {
-      return body;
-    } else {
-      throw Exception(body['message'] ?? body['error'] ?? 'Login failed');
-    }
+    return _handleResponse(response, "Login failed");
   }
 
   // ====================== PROTECTED ROUTES ======================
   static Future<Map<String, dynamic>> getProfile(String token) async {
     final response = await http.get(
-      Uri.parse("$baseUrl/api/users/profile"),
+      Uri.parse("$baseUrl/users/profile"),
       headers: {
         "Authorization": "Bearer $token",
         "Content-Type": "application/json",
@@ -70,7 +59,7 @@ class ApiService {
 
   static Future<List<dynamic>> getPets(String token) async {
     final response = await http.get(
-      Uri.parse("$baseUrl/api/pets"),
+      Uri.parse("$baseUrl/pets"),
       headers: {"Authorization": "Bearer $token"},
     );
     final data = _handleResponse(response, "Failed to load pets");
@@ -79,7 +68,7 @@ class ApiService {
 
   static Future<List<dynamic>> getVaccinations(String token) async {
     final response = await http.get(
-      Uri.parse("$baseUrl/api/users/vaccinations"),
+      Uri.parse("$baseUrl/users/vaccinations"),
       headers: {"Authorization": "Bearer $token"},
     );
     final data = _handleResponse(response, "Failed to load vaccinations");
@@ -88,7 +77,7 @@ class ApiService {
 
   static Future<List<dynamic>> getPlans(String token) async {
     final response = await http.get(
-      Uri.parse("$baseUrl/api/users/plans"),
+      Uri.parse("$baseUrl/users/plans"),
       headers: {"Authorization": "Bearer $token"},
     );
     final data = _handleResponse(response, "Failed to load plans");
@@ -96,7 +85,7 @@ class ApiService {
   }
 
   static Future<List<dynamic>> getVets() async {
-    final response = await http.get(Uri.parse("$baseUrl/api/vets"));
+    final response = await http.get(Uri.parse("$baseUrl/vets"));
     final data = _handleResponse(response, "Failed to load vets");
     return data is List ? data : [];
   }
