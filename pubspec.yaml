@@ -25,3 +25,4 @@ flutter:
   # Assets
   assets:
     - assets/images/
+    - assets/images/hero-pet.png
